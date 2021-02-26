@@ -22,7 +22,6 @@ int main(int argc, char* argv[]) {
    char* cp = dllPath + GetModuleFileName(NULL, dllPath, MAX_PATH);
    while (*--cp != '\\');
    memcpy (cp+1, "setDate.dll\x00", 12);
-   printf("%s<\n", dllPath);
 
    char* lpCommandLine = GetCommandLine();
 
@@ -32,7 +31,6 @@ int main(int argc, char* argv[]) {
 
    while (*++lpCommandLine == ' ');
 
-   printf("starting to parse with >%s<\n",lpCommandLine);
    SYSTEMTIME fake_SYSTEMTIME;
 
    *(lpCommandLine + 4) = 0; fake_SYSTEMTIME.wYear         = atoi(lpCommandLine); lpCommandLine += 5;

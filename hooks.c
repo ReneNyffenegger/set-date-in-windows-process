@@ -3,8 +3,11 @@
 #include "setDate.h"
 
 typedef void     (WINAPI  *GetSystemTime_func                 )(LPSYSTEMTIME  );
+typedef void     (WINAPI  *GetLocalTime_func                  )(LPSYSTEMTIME  );
 
 GetSystemTime_func GetSystemTime_real;
+GetLocalTime_func  GetLocalTime_real ;
+
 LPSYSTEMTIME       pFakeSystemtime = 0;
 
 void WINAPI   GetSystemTime_hook (LPSYSTEMTIME t) {
@@ -63,8 +66,10 @@ BOOL WINAPI DllMain(HINSTANCE i, DWORD dwReason, LPVOID l) {
 
          HMODULE kernelBase = GetModuleHandle("kernelbase.dll");
          GetSystemTime_func GetSystemTime_ = (GetSystemTime_func) GetProcAddress(kernelBase, "GetSystemTime");
+         GetLocalTime_func  GetLocalTime_  = (GetLocalTime_func ) GetProcAddress(kernelBase, "GetLocalTime" );
 
          attach((PVOID) GetSystemTime_                , (PVOID*) &GetSystemTime_real                 , (PVOID) GetSystemTime_hook                 );
+         attach((PVOID) GetLocalTime_                 , (PVOID*) &GetLocalTime_real                  , (PVOID) GetSystemTime_hook                 );
          if ( DetourTransactionCommit() != NO_ERROR) {
             return FALSE; 
          }
