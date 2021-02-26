@@ -8,10 +8,15 @@ typedef void     (WINAPI  *GetLocalTime_func                  )(LPSYSTEMTIME  );
 GetSystemTime_func GetSystemTime_real;
 GetLocalTime_func  GetLocalTime_real ;
 
-LPSYSTEMTIME       pFakeSystemtime = 0;
+LPSYSTEMTIME       pFakeLocalTime = 0;
+  SYSTEMTIME        fakeUniversalTime;
 
 void WINAPI   GetSystemTime_hook (LPSYSTEMTIME t) {
-   CopyMemory(t, pFakeSystemtime, sizeof(SYSTEMTIME));
+   CopyMemory(t, &fakeUniversalTime, sizeof(SYSTEMTIME));
+}
+
+void WINAPI   GetLocalTime_hook  (LPSYSTEMTIME t) {
+   CopyMemory(t, pFakeLocalTime, sizeof(SYSTEMTIME));
 }
 
 
@@ -40,9 +45,9 @@ BOOL WINAPI DllMain(HINSTANCE i, DWORD dwReason, LPVOID l) {
              PVOID pvData = DetourFindPayload(hMod, &payload, &cbData);
        
              if (pvData != NULL) {
-                 pFakeSystemtime = (LPSYSTEMTIME) pvData;
-       
-              // SystemTimeToFileTime(pFakeSystemtime, &fakeFiletime);
+                 pFakeLocalTime = (LPSYSTEMTIME) pvData;
+
+                 TzSpecificLocalTimeToSystemTime(0, pFakeLocalTime , &fakeUniversalTime);
        
               //
               // MSDN: Do not cast a pointer to a FILETIME structure to either a
@@ -69,7 +74,7 @@ BOOL WINAPI DllMain(HINSTANCE i, DWORD dwReason, LPVOID l) {
          GetLocalTime_func  GetLocalTime_  = (GetLocalTime_func ) GetProcAddress(kernelBase, "GetLocalTime" );
 
          attach((PVOID) GetSystemTime_                , (PVOID*) &GetSystemTime_real                 , (PVOID) GetSystemTime_hook                 );
-         attach((PVOID) GetLocalTime_                 , (PVOID*) &GetLocalTime_real                  , (PVOID) GetSystemTime_hook                 );
+         attach((PVOID) GetLocalTime_                 , (PVOID*) &GetLocalTime_real                  , (PVOID) GetLocalTime_hook                  );
          if ( DetourTransactionCommit() != NO_ERROR) {
             return FALSE; 
          }
