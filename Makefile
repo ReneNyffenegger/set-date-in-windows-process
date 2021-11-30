@@ -9,7 +9,7 @@ setDate.exe: setDate.o creatwth.o Detours.o disasm.o modules.o
 	g++        setDate.o creatwth.o Detours.o disasm.o modules.o -o setDate.exe
 
 hooks.o : hooks.c setDate.h
-	gcc -I$(DETOURS_SRC) -c hooks.c
+	gcc -I$(DETOURS_SRC) -std=c99 -c hooks.c
 
 Detours.o : $(DETOURS_SRC)/Detours.cpp
 	g++ -I$(DETOURS_SRC) -c $(DETOURS_SRC)/Detours.cpp
